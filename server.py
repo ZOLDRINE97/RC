@@ -40,7 +40,7 @@ def handleRequest(sentence):
     if path == '/': # Se o caminho for '/', servir o index.html por padrão
         path = 'server.html' 
 
-    local_path = os.path.normpath(os.path.join(STATIC_DIR, path.lstrip('/')))
+    local_path = os.path.normpath(os.path.join(STATIC_DIR, path.lstrip('/'))) 
 
     # Garantir que só servimos ficheiros dentro de static
     if os.path.commonpath([STATIC_DIR, local_path]) != STATIC_DIR:
@@ -127,5 +127,3 @@ while True:
         handleRequest(sentence)
 
     connectionSocket.close()
-
-    
