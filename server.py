@@ -98,7 +98,7 @@ def handleRequest(sentence):
 # WEB SERVER CONFIGURATION
 ############################################
 print("Starting the server...")
-HOST = '127.0.0.1'  # localhost
+HOST = ''  # localhost
 PORT = 8080         # porta que vamos usar
 BASEDIR = os.path.dirname(__file__)
 print(f"Current working directory: {BASEDIR}")
@@ -110,7 +110,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET para
 server_socket.bind((HOST, PORT))
 
 # colocar o socket em modo de escuta
-server_socket.listen()
+server_socket.listen(0)
 print(f"Server listening in http://{HOST}:{PORT}")
 
 
@@ -121,9 +121,13 @@ print(f"Server listening in http://{HOST}:{PORT}")
 while True:
     connectionSocket, addr = server_socket.accept()
     print(f"Connection from {addr} has been established.\n")
-    
-    sentence = connectionSocket.recv(1024).decode()
-    if isGET(sentence):
-        handleRequest(sentence)
+    connectionSocket.settimeout(2)
+    try: 
+        sentence,addrs = connectionSocket.recvfrom(4096)
+        sentence = sentence.decode()
+        if isGET(sentence):
+            handleRequest(sentence)
+    except:
+        print("Timeout :/")
 
     connectionSocket.close()
