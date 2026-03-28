@@ -15,7 +15,8 @@ MIME_TYPES = {
 
 STATIC_DIR = os.path.normpath(os.path.join(os.getcwd(), 'static'))
 
-# Verify if the request is a GET request, if not, send a 501 Not Implemented response and close the connection
+
+# Verifica se o pedido e GET; caso nao seja, envia 501 Not Implemented e fecha a ligacao
 def isGET(sentence):
     if sentence.startswith("GET") == True:
         print(f"Received GET request from {addr}:\n{sentence}\n")
@@ -29,12 +30,13 @@ def isGET(sentence):
         # connectionSocket.close()
         return False
 
-# Handle the HTTP request by parsing the requested path, checking if the file exists, and sending the appropriate response (200 OK with content or 404 Not Found)
-def handleRequest(sentence):
-    first_line = sentence.split('\r\n')[0]  # pegar a primeira linha da requisição
-    parts = first_line.split(' ')  # dividir a primeira linha em partes (método, caminho, versão)
 
-    path = parts[1]  # pegar o caminho da requisição
+# Trata o pedido HTTP: analisa o caminho pedido, verifica se o ficheiro existe e envia a resposta adequada (200 OK ou 404 Not Found)
+def handleRequest(sentence):
+    first_line = sentence.split('\r\n')[0]  # obter a primeira linha do pedido
+    parts = first_line.split(' ')  # dividir a primeira linha em partes (metodo, caminho, versao)
+
+    path = parts[1]  # obter o caminho do pedido
     path = path.split('?', 1)[0]  # ignorar query string
 
     if path == '/': # Se o caminho for '/', servir o index.html por padrão
@@ -54,14 +56,14 @@ def handleRequest(sentence):
         print(f"Blocked path traversal: {local_path}\n")
         return
 
-    # Verificar se o arquivo existe
+    # Verificar se o ficheiro existe
     if os.path.isfile(local_path):
         try:
-            # Ler o conteúdo do arquivo
+            # Ler o conteudo do ficheiro
             with open(local_path, 'rb') as f:
                 content = f.read()
             
-            # Determinar o Content-Type baseado na extensão
+            # Determinar o Content-Type com base na extensao
             file_extension = os.path.splitext(local_path)[1].lstrip('.').lower()
             content_type = MIME_TYPES.get(file_extension, 'application/octet-stream')
             
@@ -74,7 +76,7 @@ def handleRequest(sentence):
         except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
             print(f"Client closed connection while sending file: {local_path}")
         except Exception as e:
-            # Erro ao ler o arquivo
+            # Erro ao ler o ficheiro
             error_response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 21\r\n\r\nInternal Server Error"
             try:
                 connectionSocket.sendall(error_response.encode())
@@ -82,7 +84,7 @@ def handleRequest(sentence):
                 print(f"Client closed connection before 500 could be sent: {addr}")
             print(f"Error reading file: {e}\n")
     else:
-        # Arquivo não encontrado - 404 Not Found
+        # Ficheiro nao encontrado - 404 Not Found
         not_found_message = "404 Not Found"
         response_header = f"HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: {len(not_found_message)}\r\n\r\n"
         try:
@@ -98,15 +100,16 @@ def handleRequest(sentence):
 # WEB SERVER CONFIGURATION
 ############################################
 print("Starting the server...")
-HOST = ''  # localhost
-PORT = 8080         # porta que vamos usar
+
 BASEDIR = os.path.dirname(__file__)
 print(f"Current working directory: {BASEDIR}")
 
-# criar socket 
+# criar socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET para IPv4, SOCK_STREAM para TCP
 
-#associar endereço e porta ao socket
+# associar endereco e porta ao socket
+HOST = ''  # localhost
+PORT = 8080         # porta que vamos usar
 server_socket.bind((HOST, PORT))
 
 # colocar o socket em modo de escuta
